@@ -1,6 +1,9 @@
 # Claude Code agent folder - may contain credentials and tokens
 .claude/
 
+# Claude Code documentation and reports
+claudedocs/
+
 # Python
 __pycache__/
 *.py[cod]

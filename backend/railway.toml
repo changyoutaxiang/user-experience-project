@@ -2,47 +2,11 @@
 # https://docs.railway.app/deploy/config-as-code
 
 [build]
-# Build command
 builder = "NIXPACKS"
 
 [deploy]
-# Start command for production
 startCommand = "alembic upgrade head && uvicorn src.api.main:app --host 0.0.0.0 --port $PORT --workers 4"
-# Health check path
 healthcheckPath = "/health"
-# Health check timeout (seconds)
 healthcheckTimeout = 100
-# Restart policy on failure
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
-
-[build.env]
-# Build-time environment variables
-PYTHON_VERSION = "3.11"
-
-# Service configuration
-[[services]]
-name = "backend"
-
-# Environment variables (set these in Railway dashboard)
-# Required variables:
-# - DATABASE_URL: PostgreSQL connection string from Railway
-# - SECRET_KEY: Random secret key for JWT signing
-# - ALLOWED_ORIGINS: Frontend domain (e.g., https://your-frontend.railway.app)
-# - DEBUG: Set to "False" in production
-
-# Optional variables:
-# - ACCESS_TOKEN_EXPIRE_MINUTES: Default 30
-# - ALGORITHM: Default HS256
-# - APP_NAME: Default "用户体验拯救项目管理系统"
-
-# Healthcheck configuration
-[services.healthcheck]
-path = "/health"
-interval = 30
-timeout = 10
-
-# Resource limits (adjust based on your plan)
-# [services.resources]
-# memory = 512  # MB
-# cpu = 0.5     # vCPU cores

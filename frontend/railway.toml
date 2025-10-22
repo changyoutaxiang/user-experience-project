@@ -1,0 +1,52 @@
+# Railway Deployment Configuration for Frontend
+# https://docs.railway.app/deploy/config-as-code
+
+[build]
+# Build command
+builder = "NIXPACKS"
+# Custom build command to ensure dependencies are installed
+buildCommand = "npm install && npm run build"
+
+[deploy]
+# Start command - serve the built static files
+# Note: Railway will automatically detect and serve the dist/ directory
+# If you need a custom server, uncomment and modify the startCommand below
+# startCommand = "npx serve -s dist -l $PORT"
+startCommand = "npm run preview -- --port $PORT --host 0.0.0.0"
+# Health check path
+healthcheckPath = "/"
+# Health check timeout (seconds)
+healthcheckTimeout = 100
+# Restart policy on failure
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[build.env]
+# Build-time environment variables
+NODE_VERSION = "18"
+
+# Service configuration
+[[services]]
+name = "frontend"
+
+# Environment variables (set these in Railway dashboard)
+# Required variables:
+# - VITE_API_BASE_URL: Backend API URL (e.g., https://your-backend.railway.app)
+
+# Optional variables:
+# - VITE_DEBUG: Set to "false" in production
+
+# Healthcheck configuration
+[services.healthcheck]
+path = "/"
+interval = 30
+timeout = 10
+
+# Resource limits (adjust based on your plan)
+# [services.resources]
+# memory = 256  # MB
+# cpu = 0.25    # vCPU cores
+
+# Static file serving optimization
+# For production, consider using a CDN or static hosting service
+# like Vercel, Netlify, or Cloudflare Pages which are optimized for SPAs

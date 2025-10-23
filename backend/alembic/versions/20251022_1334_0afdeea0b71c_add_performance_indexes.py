@@ -30,7 +30,7 @@ def upgrade() -> None:
 
     # Users table indexes
     create_index_if_not_exists('ix_users_is_active', 'users', ['is_active'])
-    create_index_if_not_exists('ix_users_role', 'users', ['role'])
+    # Note: ix_users_role already created in migration 001
 
     # Projects table indexes (some may already exist from migration 002)
     create_index_if_not_exists('ix_projects_status', 'projects', ['status'])
@@ -75,29 +75,24 @@ def upgrade() -> None:
     create_index_if_not_exists('ix_document_links_created_at', 'document_links', ['created_at'])
 
     # Audit Logs table indexes (critical for performance on large datasets)
-    create_index_if_not_exists('ix_audit_logs_user_id', 'audit_logs', ['user_id'])
-    create_index_if_not_exists('ix_audit_logs_action_type', 'audit_logs', ['action_type'])
+    # Note: ix_audit_logs_user_id, ix_audit_logs_action_type, ix_audit_logs_timestamp already created in migration 001
     create_index_if_not_exists('ix_audit_logs_resource_type', 'audit_logs', ['resource_type'])
     create_index_if_not_exists('ix_audit_logs_resource_id', 'audit_logs', ['resource_id'])
-    create_index_if_not_exists('ix_audit_logs_created_at', 'audit_logs', ['created_at'])
-    # Composite indexes for common audit log queries
-    create_index_if_not_exists('ix_audit_logs_user_created', 'audit_logs', ['user_id', 'created_at'])
+    # Composite indexes for common audit log queries (audit_logs uses 'timestamp' not 'created_at')
+    create_index_if_not_exists('ix_audit_logs_user_timestamp', 'audit_logs', ['user_id', 'timestamp'])
     create_index_if_not_exists('ix_audit_logs_resource_type_id', 'audit_logs', ['resource_type', 'resource_id'])
-    create_index_if_not_exists('ix_audit_logs_action_created', 'audit_logs', ['action_type', 'created_at'])
+    create_index_if_not_exists('ix_audit_logs_action_timestamp', 'audit_logs', ['action_type', 'timestamp'])
 
 
 def downgrade() -> None:
     """Remove performance indexes."""
 
-    # Audit Logs indexes
-    op.drop_index('ix_audit_logs_action_created', 'audit_logs')
+    # Audit Logs indexes (only drop the ones we created, not the ones from migration 001)
+    op.drop_index('ix_audit_logs_action_timestamp', 'audit_logs')
     op.drop_index('ix_audit_logs_resource_type_id', 'audit_logs')
-    op.drop_index('ix_audit_logs_user_created', 'audit_logs')
-    op.drop_index('ix_audit_logs_created_at', 'audit_logs')
+    op.drop_index('ix_audit_logs_user_timestamp', 'audit_logs')
     op.drop_index('ix_audit_logs_resource_id', 'audit_logs')
     op.drop_index('ix_audit_logs_resource_type', 'audit_logs')
-    op.drop_index('ix_audit_logs_action_type', 'audit_logs')
-    op.drop_index('ix_audit_logs_user_id', 'audit_logs')
 
     # Document Links indexes
     op.drop_index('ix_document_links_created_at', 'document_links')
@@ -137,6 +132,5 @@ def downgrade() -> None:
     op.drop_index('ix_projects_owner_id', 'projects')
     op.drop_index('ix_projects_status', 'projects')
 
-    # Users indexes
-    op.drop_index('ix_users_role', 'users')
+    # Users indexes (only drop the ones we created, not ix_users_role from migration 001)
     op.drop_index('ix_users_is_active', 'users')

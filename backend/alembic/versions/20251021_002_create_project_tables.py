@@ -19,15 +19,28 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create project_status enum type
+    # Create project_status enum type only if it doesn't exist
+    conn = op.get_bind()
+    result = conn.execute(
+        sa.text("SELECT 1 FROM pg_type WHERE typname = 'projectstatus'")
+    ).fetchone()
+
+    if not result:
+        project_status_enum = postgresql.ENUM(
+            'planning', 'in_progress', 'completed', 'archived',
+            name='projectstatus',
+            create_type=True
+        )
+        project_status_enum.create(conn)
+
+    # Create projects table (use checkfirst for table creation)
+    # Note: We need to reference the enum by name since it may already exist
     project_status_enum = postgresql.ENUM(
         'planning', 'in_progress', 'completed', 'archived',
         name='projectstatus',
-        create_type=True
+        create_type=False
     )
-    project_status_enum.create(op.get_bind(), checkfirst=True)
 
-    # Create projects table
     op.create_table(
         'projects',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),

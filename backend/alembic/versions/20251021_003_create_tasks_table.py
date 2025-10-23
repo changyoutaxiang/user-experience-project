@@ -19,23 +19,45 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Create task_status enum type
+    # Create task_status enum type only if it doesn't exist
+    conn = op.get_bind()
+    result = conn.execute(
+        sa.text("SELECT 1 FROM pg_type WHERE typname = 'taskstatus'")
+    ).fetchone()
+
+    if not result:
+        task_status_enum = postgresql.ENUM(
+            'todo', 'in_progress', 'in_review', 'completed', 'cancelled',
+            name='taskstatus',
+            create_type=True
+        )
+        task_status_enum.create(conn)
+
+    # Create task_priority enum type only if it doesn't exist
+    result = conn.execute(
+        sa.text("SELECT 1 FROM pg_type WHERE typname = 'taskpriority'")
+    ).fetchone()
+
+    if not result:
+        task_priority_enum = postgresql.ENUM(
+            'low', 'medium', 'high', 'urgent',
+            name='taskpriority',
+            create_type=True
+        )
+        task_priority_enum.create(conn)
+
+    # Create tasks table (reference enums by name since they may already exist)
     task_status_enum = postgresql.ENUM(
         'todo', 'in_progress', 'in_review', 'completed', 'cancelled',
         name='taskstatus',
-        create_type=True
+        create_type=False
     )
-    task_status_enum.create(op.get_bind(), checkfirst=True)
-
-    # Create task_priority enum type
     task_priority_enum = postgresql.ENUM(
         'low', 'medium', 'high', 'urgent',
         name='taskpriority',
-        create_type=True
+        create_type=False
     )
-    task_priority_enum.create(op.get_bind(), checkfirst=True)
 
-    # Create tasks table
     op.create_table(
         'tasks',
         sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),

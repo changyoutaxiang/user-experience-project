@@ -5,6 +5,7 @@ import time
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 from slowapi.errors import RateLimitExceeded
@@ -26,13 +27,43 @@ logger = logging.getLogger(__name__)
 # Create FastAPI application
 app = FastAPI(
     title=settings.APP_NAME,
-    description="用户体验拯救项目群管理系统 API",
+    description="""
+    ## 用户体验拯救项目群管理系统 API
+
+    一个现代化的全栈项目管理系统，提供完整的 RESTful API。
+
+    ### 主要功能
+    - 🔐 用户认证和授权（JWT）
+    - 📊 项目和任务管理
+    - 💰 项目支出追踪
+    - 📎 飞书文档集成
+    - 🔍 完整的审计日志
+
+    ### 认证
+    大多数 API 端点需要 JWT 认证。获取 token：
+    1. 使用 `/api/v1/auth/login` 登录
+    2. 在请求头中添加: `Authorization: Bearer <token>`
+
+    ### 速率限制
+    - 默认限制: 100 次/分钟
+    - 登录接口: 5 次/分钟
+    """,
     version="0.1.0",
+    contact={
+        "name": "UX Rescue Team",
+        "url": "https://github.com/changyoutaxiang/user-experience-project",
+    },
+    license_info={
+        "name": "MIT",
+    },
 )
 
 # Configure rate limiting
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_error_handler)
+
+# Add GZip compression middleware (responses > 1KB)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Add security headers middleware
 app.add_middleware(SecurityHeadersMiddleware)
@@ -132,11 +163,39 @@ async def general_exception_handler(request: Request, exc: Exception):
     )
 
 
-# Health check endpoint
+# Health check endpoints
 @app.get("/health", tags=["Health"])
 async def health_check():
-    """Health check endpoint."""
+    """Simple health check endpoint."""
     return {"status": "healthy", "app": settings.APP_NAME}
+
+
+@app.get("/health/detailed", tags=["Health"])
+async def detailed_health_check():
+    """Detailed health check with database connectivity."""
+    from datetime import datetime
+    from src.core.database import get_db
+
+    health_status = {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat(),
+        "app": settings.APP_NAME,
+        "environment": settings.ENVIRONMENT,
+        "checks": {}
+    }
+
+    # Database check
+    try:
+        db = get_db()
+        async for session in db:
+            await session.execute("SELECT 1")
+            health_status["checks"]["database"] = "healthy"
+            break
+    except Exception as e:
+        health_status["status"] = "unhealthy"
+        health_status["checks"]["database"] = f"unhealthy: {str(e)}"
+
+    return health_status
 
 
 # Include routers

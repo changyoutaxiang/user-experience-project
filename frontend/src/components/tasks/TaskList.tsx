@@ -70,9 +70,9 @@ export const TaskList = ({
                 <span>
                   截止日期: <span className={task.is_overdue ? 'text-red-600 font-medium' : ''}>{formatDate(task.due_date)}</span>
                 </span>
-                {task.assignee_name && (
+                {task.assignee && (
                   <span>
-                    负责人: <span className="text-gray-700">{task.assignee_name}</span>
+                    负责人: <span className="text-gray-700">{task.assignee.name}</span>
                   </span>
                 )}
                 {task.completed_at && (

@@ -41,4 +41,6 @@ api.interceptors.response.use(
   }
 )
 
+// Export both default and named exports for flexibility
+export { api }
 export default api

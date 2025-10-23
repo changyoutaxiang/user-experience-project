@@ -54,7 +54,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 .pnpm-store/
-package-lock.json
+# package-lock.json - 不再忽略，用于锁定依赖版本
 yarn.lock
 pnpm-lock.yaml
 
@@ -81,7 +81,7 @@ htmlcov/
 .coverage
 
 # Docker
-.dockerignore
+# .dockerignore - 不再忽略，Docker构建需要这些文件
 
 # Railway
 .railway/

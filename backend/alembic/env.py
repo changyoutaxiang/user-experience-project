@@ -24,7 +24,8 @@ from src.core.config import settings
 config = context.config
 
 # Override sqlalchemy.url with value from settings
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# Use database_url_async to automatically convert postgresql:// to postgresql+asyncpg://
+config.set_main_option("sqlalchemy.url", settings.database_url_async)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

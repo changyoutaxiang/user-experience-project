@@ -50,6 +50,21 @@ class Settings(BaseSettings):
         return v
 
     @property
+    def database_url_async(self) -> str:
+        """
+        Convert DATABASE_URL to async format for asyncpg.
+
+        Railway provides DATABASE_URL in format: postgresql://...
+        We need: postgresql+asyncpg://...
+        """
+        url = self.DATABASE_URL
+        if url.startswith("postgresql://"):
+            return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgres://"):
+            return url.replace("postgres://", "postgresql+asyncpg://", 1)
+        return url
+
+    @property
     def cors_origins(self) -> List[str]:
         """Parse CORS origins from comma-separated string."""
         origins = [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]

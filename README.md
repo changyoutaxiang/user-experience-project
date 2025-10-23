@@ -87,9 +87,11 @@
 
 ### DevOps
 - **容器化**: Docker + Docker Compose
-- **CI/CD**: Railway (planned)
+- **CI/CD**: GitHub Actions + Railway
+- **部署平台**: Railway (已配置完成)
 - **代码质量**: Black, ESLint, Prettier
-- **测试**: pytest, Vitest
+- **测试**: pytest (40+ tests), Vitest
+- **安全扫描**: CodeQL, Safety, npm audit
 
 ## 快速开始
 
@@ -319,21 +321,27 @@ npm run build
 # 将 dist/ 目录部署到静态托管服务
 ```
 
-### Railway 部署
+### Railway 部署 (推荐)
 
-项目包含 Railway 部署配置文件：
-- `backend/railway.toml`
-- `frontend/railway.toml`
+项目已完全配置好 Railway 部署，支持一键部署：
 
-```bash
-# 安装 Railway CLI
-npm install -g @railway/cli
+**🚀 快速部署** (5-7 分钟):
+- 📖 [Railway 部署快速指南](RAILWAY_部署快速指南.md) - **推荐新手使用**
+- 📘 [Railway 完整部署教程](RAILWAY_DEPLOYMENT_GUIDE.md) - 详细步骤说明
 
-# 登录并部署
-railway login
-railway link
-railway up
-```
+**核心步骤**:
+1. 连接 GitHub 仓库到 Railway
+2. 添加 PostgreSQL 数据库
+3. 配置环境变量
+4. 自动部署完成
+
+**成本**: 免费 (Hobby Plan $5/月 额度内)
+
+**部署后获得**:
+- ✅ 自动 HTTPS 加密
+- ✅ 自动 CI/CD
+- ✅ PostgreSQL 数据库
+- ✅ 实时日志监控
 
 ## 文档
 

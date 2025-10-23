@@ -1,11 +1,17 @@
+# Frontend build configuration
+# Updated: 2025-10-23 - Force rebuild with cache invalidation
+
 [phases.setup]
 nixPkgs = ['nodejs-18_x']
 
 [phases.install]
-cmds = ['npm ci']
+cmds = ['npm ci --prefer-offline=false']
 
 [phases.build]
-cmds = ['npm run build']
+cmds = [
+  'rm -rf dist node_modules/.vite',
+  'npm run build'
+]
 
 [start]
 cmd = 'npm run preview -- --port $PORT --host 0.0.0.0'

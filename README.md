@@ -4,6 +4,8 @@
 
 ![Project Status](https://img.shields.io/badge/status-active-success.svg)
 ![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
+![CI](https://github.com/changyoutaxiang/user-experience-project/actions/workflows/ci.yml/badge.svg)
+![Security](https://github.com/changyoutaxiang/user-experience-project/actions/workflows/security.yml/badge.svg)
 
 ## 📋 目录
 

@@ -7,9 +7,15 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
+from slowapi.errors import RateLimitExceeded
 
 from src.api.routes import audit_logs, auth, dashboard, expenses, projects, tasks, users
 from src.core.config import settings
+from src.core.middleware import (
+    limiter,
+    rate_limit_error_handler,
+    SecurityHeadersMiddleware,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -24,12 +30,19 @@ app = FastAPI(
     version="0.1.0",
 )
 
+# Configure rate limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_error_handler)
+
+# Add security headers middleware
+app.add_middleware(SecurityHeadersMiddleware)
+
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],  # 明确指定允许的方法
     allow_headers=["*"],
 )
 

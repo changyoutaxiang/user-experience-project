@@ -21,6 +21,7 @@ bcrypt==4.1.2
 
 # CORS and Middleware
 python-dotenv==1.0.1
+slowapi==0.1.9
 
 # Testing
 pytest==7.4.4

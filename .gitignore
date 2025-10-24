@@ -65,7 +65,19 @@ pnpm-lock.yaml
 .env.development
 .env.production
 backend/.env
+backend/.env.supabase
 frontend/.env
+frontend/.env.production
+
+# Vercel 环境变量文件（包含敏感信息）
+backend/vercel-env-vars.txt
+frontend/vercel-env-vars.txt
+
+# 截图可能包含敏感信息
+*.png
+*.jpg
+*.jpeg
+*.gif
 
 # Database
 *.db

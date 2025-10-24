@@ -1,7 +1,8 @@
-"""Vercel serverless entry point - 手动处理 HTTP 请求"""
+"""Vercel serverless entry point - 完整数据库支持版本"""
 from http.server import BaseHTTPRequestHandler
 import json
-import urllib.parse
+import asyncio
+from db import create_user, authenticate_user
 
 class handler(BaseHTTPRequestHandler):
 
@@ -27,7 +28,7 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
 
         if self.path == '/health' or self.path == '/':
-            response = {"status": "healthy", "message": "Backend is running"}
+            response = {"status": "healthy", "message": "Backend with database support"}
         else:
             response = {"error": "Not found"}
 
@@ -43,31 +44,76 @@ class handler(BaseHTTPRequestHandler):
         try:
             data = json.loads(body) if body else {}
         except:
-            data = {}
-
-        # 处理注册请求
-        if self.path == '/api/v1/auth/register':
-            self.send_response(201)
+            self.send_response(400)
             self.send_header('Content-type', 'application/json')
             self._send_cors_headers()
             self.end_headers()
+            self.wfile.write(json.dumps({"error": "Invalid JSON"}).encode())
+            return
 
-            response = {
-                "id": "temp-user-id",
-                "name": data.get("name", ""),
-                "email": data.get("email", ""),
-                "role": "member",
-                "is_active": True,
-                "created_at": "2025-10-24T00:00:00Z"
-            }
+        # 处理注册请求
+        if self.path == '/api/v1/auth/register':
+            try:
+                # 验证必需字段
+                if not data.get('name') or not data.get('email') or not data.get('password'):
+                    self.send_response(400)
+                    self.send_header('Content-type', 'application/json')
+                    self._send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"detail": "姓名、邮箱和密码都是必需的"}).encode())
+                    return
 
-            self.wfile.write(json.dumps(response).encode())
+                # 验证密码长度
+                if len(data.get('password', '')) < 8:
+                    self.send_response(400)
+                    self.send_header('Content-type', 'application/json')
+                    self._send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"detail": "密码长度至少为 8 个字符"}).encode())
+                    return
+
+                # 创建用户（使用异步函数）
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                user = loop.run_until_complete(
+                    create_user(
+                        name=data['name'],
+                        email=data['email'],
+                        password=data['password']
+                    )
+                )
+                loop.close()
+
+                # 返回成功响应
+                self.send_response(201)
+                self.send_header('Content-type', 'application/json')
+                self._send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps(user).encode())
+
+            except Exception as e:
+                error_message = str(e)
+                status_code = 400 if "已被注册" in error_message else 500
+
+                self.send_response(status_code)
+                self.send_header('Content-type', 'application/json')
+                self._send_cors_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({"detail": error_message}).encode())
+
+        # 处理登录请求（暂时不实现，返回 501）
+        elif self.path == '/api/v1/auth/login':
+            self.send_response(501)
+            self.send_header('Content-type', 'application/json')
+            self._send_cors_headers()
+            self.end_headers()
+            self.wfile.write(json.dumps({"detail": "登录功能即将推出"}).encode())
+
         else:
             self.send_response(404)
             self.send_header('Content-type', 'application/json')
             self._send_cors_headers()
             self.end_headers()
-
             self.wfile.write(json.dumps({"error": "Endpoint not found"}).encode())
 
         return

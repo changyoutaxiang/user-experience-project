@@ -1,25 +1,15 @@
-from http.server import BaseHTTPRequestHandler
-import json
+"""Vercel serverless entry point with FastAPI."""
+import sys
+from pathlib import Path
 
-class handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.end_headers()
+# Add project root to Python path
+root = Path(__file__).parent.parent
+sys.path.insert(0, str(root))
 
-        response = {
-            "status": "healthy",
-            "message": "Backend is running on Vercel"
-        }
+# Import FastAPI app
+from src.api.main import app
 
-        self.wfile.write(json.dumps(response).encode())
-        return
+# Vercel serverless handler
+from mangum import Mangum
 
-    def do_OPTIONS(self):
-        self.send_response(200)
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', '*')
-        self.end_headers()
-        return
+handler = Mangum(app, lifespan="off")

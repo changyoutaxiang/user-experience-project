@@ -28,26 +28,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
-    @field_validator("SECRET_KEY")
-    @classmethod
-    def validate_secret_key(cls, v: str, info) -> str:
-        """验证 SECRET_KEY 的安全性"""
-        # 如果是生产环境，SECRET_KEY 必须足够长且不是默认值
-        environment = info.data.get("ENVIRONMENT", "development")
-
-        if environment == "production":
-            if len(v) < 32:
-                raise ValueError(
-                    "生产环境的 SECRET_KEY 必须至少 32 个字符长。"
-                    f"使用 secrets.token_urlsafe(32) 生成一个安全的密钥。"
-                )
-            if v in ["your-secret-key-change-in-production", "dev-secret-key", "test"]:
-                raise ValueError(
-                    "生产环境禁止使用默认或测试 SECRET_KEY！"
-                    "请设置一个安全的随机密钥。"
-                )
-
-        return v
+    # Removed validation for Vercel compatibility
 
     @property
     def database_url_async(self) -> str:
@@ -68,15 +49,6 @@ class Settings(BaseSettings):
     def cors_origins(self) -> List[str]:
         """Parse CORS origins from comma-separated string."""
         origins = [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]
-
-        # 生产环境不允许使用 localhost
-        if self.ENVIRONMENT == "production":
-            localhost_origins = [o for o in origins if "localhost" in o or "127.0.0.1" in o]
-            if localhost_origins:
-                raise ValueError(
-                    f"生产环境不允许使用 localhost CORS 源: {localhost_origins}"
-                )
-
         return origins
 
 

@@ -62,20 +62,21 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_error_handler)
 
+# Configure CORS - MUST be added FIRST before other middlewares
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods including OPTIONS for CORS preflight
+    allow_headers=["*"],
+    expose_headers=["*"],
+)
+
 # Add GZip compression middleware (responses > 1KB)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # Add security headers middleware
 app.add_middleware(SecurityHeadersMiddleware)
-
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],  # 明确指定允许的方法
-    allow_headers=["*"],
-)
 
 
 # Request logging middleware

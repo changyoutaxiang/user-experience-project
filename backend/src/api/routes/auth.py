@@ -6,8 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.api.deps import get_current_user
 from src.core.database import get_db
 from src.models.user import User
-from src.schemas.user import Token, UserResponse
+from src.schemas.user import Token, UserCreate, UserResponse
 from src.services.auth_service import AuthService
+from src.services.user_service import UserService
 
 router = APIRouter()
 
@@ -63,3 +64,25 @@ async def logout():
     by removing the token from storage.
     """
     return {"message": "Successfully logged out"}
+
+
+@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+async def register(
+    user_data: UserCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Public user registration endpoint.
+
+    Creates a new user account with 'member' role.
+    - **name**: User's full name
+    - **email**: User's email address (must be unique)
+    - **password**: User's password (min 8 characters)
+    """
+    # Force role to 'member' for public registration
+    from src.models.user import UserRole
+    user_data.role = UserRole.MEMBER
+
+    # Create the user (UserService will check if email already exists)
+    user = await UserService.create_user(db=db, user_data=user_data)
+    return user

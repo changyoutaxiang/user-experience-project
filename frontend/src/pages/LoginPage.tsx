@@ -2,7 +2,7 @@
  * Login page component.
  */
 import { useState, FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/common/Button'
 import { Input } from '@/components/common/Input'
@@ -15,6 +15,10 @@ export const LoginPage = () => {
 
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // Get success message from registration
+  const successMessage = (location.state as any)?.message
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -71,11 +75,24 @@ export const LoginPage = () => {
             </div>
           </div>
 
+          {successMessage && (
+            <div className="text-sm text-green-600 bg-green-50 p-3 rounded">
+              {successMessage}
+            </div>
+          )}
+
           {error && <div className="text-sm text-destructive">{error}</div>}
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? '登录中...' : '登录'}
           </Button>
+
+          <div className="text-center text-sm">
+            <span className="text-gray-600">还没有账户？</span>{' '}
+            <Link to="/register" className="text-primary hover:underline">
+              立即注册
+            </Link>
+          </div>
         </form>
       </div>
     </div>

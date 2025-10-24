@@ -3,7 +3,7 @@
  */
 import { useAuthStore } from '@/store/authStore'
 import api from '@/services/api'
-import { LoginCredentials, AuthResponse } from '@/types/user'
+import { LoginCredentials, AuthResponse, User, UserCreateRequest } from '@/types/user'
 
 export const useAuth = () => {
   const { user, isAuthenticated, setAuth, clearAuth } = useAuthStore()
@@ -43,10 +43,27 @@ export const useAuth = () => {
     }
   }
 
+  const register = async (userData: UserCreateRequest) => {
+    try {
+      const response = await api.post<User>('/api/v1/auth/register', userData)
+
+      return {
+        success: true,
+        user: response.data
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.detail || 'Registration failed',
+      }
+    }
+  }
+
   return {
     user,
     isAuthenticated,
     login,
     logout,
+    register,
   }
 }

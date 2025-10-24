@@ -50,6 +50,7 @@ export interface ProjectMember {
   project_id: string
   user_id: string
   user: User
+  user_name?: string  // 后端返回的计算字段
   role: string | null
   assigned_at: string
 }

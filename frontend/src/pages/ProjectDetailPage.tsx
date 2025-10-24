@@ -6,7 +6,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { projectService } from '@/services/projectService'
 import { taskService } from '@/services/taskService'
 import { ProjectDetail, DocumentLink } from '@/types/project'
-import { Task, TaskCreateRequest } from '@/types/task'
+import { Task, TaskCreateRequest, TaskUpdateRequest } from '@/types/task'
 import { ProjectStatusBadge } from '@/components/projects/ProjectStatusBadge'
 import { ProjectMemberPicker } from '@/components/projects/ProjectMemberPicker'
 import { DocumentLinkList } from '@/components/documents/DocumentLinkList'
@@ -79,11 +79,13 @@ export const ProjectDetailPage = () => {
     }
   }
 
-  const handleCreateTask = async (data: TaskCreateRequest) => {
+  const handleCreateTask = async (data: TaskCreateRequest | TaskUpdateRequest) => {
     if (!projectId) return { success: false, error: 'Project ID not found' }
 
     try {
-      await taskService.createTask({ ...data, project_id: projectId })
+      // 确保data包含project_id（创建时需要）
+      const createData = { ...data, project_id: projectId } as TaskCreateRequest
+      await taskService.createTask(createData)
       await fetchProjectData()
       setShowAddTaskModal(false)
       return { success: true }

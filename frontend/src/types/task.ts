@@ -27,6 +27,7 @@ export interface Task {
   project_id: string
   assignee_id: string | null
   assignee: User | null
+  assignee_name?: string | null  // 后端返回的计算字段
   created_by_id: string | null
   due_date: string | null
   is_overdue: boolean

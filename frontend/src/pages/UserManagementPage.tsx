@@ -29,9 +29,10 @@ export const UserManagementPage = () => {
     }
   }
 
-  const handleCreateUser = async (data: UserCreateRequest) => {
+  const handleCreateUser = async (data: UserCreateRequest | UserUpdateRequest) => {
     try {
-      await userService.createUser(data)
+      // 类型断言为 UserCreateRequest，因为这个函数只用于创建
+      await userService.createUser(data as UserCreateRequest)
       setShowCreateModal(false)
       await fetchUsers()
       return { success: true }

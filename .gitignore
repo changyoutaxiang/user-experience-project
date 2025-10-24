@@ -72,6 +72,9 @@ frontend/.env.production
 # Vercel 环境变量文件（包含敏感信息）
 backend/vercel-env-vars.txt
 frontend/vercel-env-vars.txt
+backend/.env.vercel
+frontend/.env.vercel
+.env.vercel.all
 
 # 截图可能包含敏感信息
 *.png

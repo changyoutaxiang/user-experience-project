@@ -1,6 +1,5 @@
 """数据库连接和用户操作 - Vercel serverless 版本"""
 import os
-import asyncio
 from datetime import datetime
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy import text
@@ -9,20 +8,31 @@ from passlib.context import CryptContext
 # 密码加密上下文
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# 数据库配置
-DATABASE_URL = os.environ.get("DATABASE_URL", "")
+# 全局变量，延迟初始化
+_engine = None
+_session_factory = None
 
-# 创建异步引擎
-engine = create_async_engine(DATABASE_URL, echo=False, pool_pre_ping=True)
+def get_session_factory():
+    """获取或创建会话工厂"""
+    global _engine, _session_factory
 
-# 创建会话工厂
-AsyncSessionLocal = async_sessionmaker(
-    engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-    autocommit=False,
-    autoflush=False,
-)
+    if _session_factory is None:
+        # 数据库配置
+        database_url = os.environ.get("DATABASE_URL", "")
+
+        # 创建异步引擎
+        _engine = create_async_engine(database_url, echo=False, pool_pre_ping=True)
+
+        # 创建会话工厂
+        _session_factory = async_sessionmaker(
+            _engine,
+            class_=AsyncSession,
+            expire_on_commit=False,
+            autocommit=False,
+            autoflush=False,
+        )
+
+    return _session_factory
 
 def hash_password(password: str) -> str:
     """加密密码"""
@@ -47,7 +57,8 @@ async def create_user(name: str, email: str, password: str) -> dict:
     Raises:
         Exception: 如果邮箱已存在或数据库操作失败
     """
-    async with AsyncSessionLocal() as session:
+    session_factory = get_session_factory()
+    async with session_factory() as session:
         try:
             # 检查邮箱是否已存在
             check_query = text("SELECT id FROM users WHERE email = :email")
@@ -114,7 +125,8 @@ async def authenticate_user(email: str, password: str) -> dict:
     Raises:
         Exception: 如果认证失败
     """
-    async with AsyncSessionLocal() as session:
+    session_factory = get_session_factory()
+    async with session_factory() as session:
         try:
             # 查询用户
             query = text("""

@@ -4,23 +4,38 @@ import json
 import sys
 from io import StringIO
 
-# 捕获导入测试的输出
+# 测试数据库相关导入
 import_test_output = []
 
+# 测试 1: 基本导入
 try:
-    # 捕获 print 输出
-    old_stdout = sys.stdout
-    sys.stdout = StringIO()
-
-    import db_test
-
-    # 获取输出
-    output = sys.stdout.getvalue()
-    sys.stdout = old_stdout
-    import_test_output = output.split('\n')
+    import os
+    from datetime import datetime
+    import_test_output.append("Step 1: Basic imports OK")
 except Exception as e:
-    sys.stdout = old_stdout
-    import_test_output = [f"Import test failed: {str(e)}"]
+    import_test_output.append(f"Step 1 FAILED: {e}")
+
+# 测试 2: SQLAlchemy 导入
+try:
+    from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+    from sqlalchemy import text
+    import_test_output.append("Step 2: SQLAlchemy imports OK")
+except Exception as e:
+    import_test_output.append(f"Step 2 FAILED: {e}")
+
+# 测试 3: Passlib 导入
+try:
+    from passlib.context import CryptContext
+    import_test_output.append("Step 3: Passlib import OK")
+except Exception as e:
+    import_test_output.append(f"Step 3 FAILED: {e}")
+
+# 测试 4: 创建 CryptContext
+try:
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    import_test_output.append("Step 4: CryptContext creation OK")
+except Exception as e:
+    import_test_output.append(f"Step 4 FAILED: {e}")
 
 class handler(BaseHTTPRequestHandler):
 

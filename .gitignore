@@ -1,102 +1,48 @@
-# Claude Code agent folder - may contain credentials and tokens
-.claude/
-
-# Claude Code documentation and reports
-claudedocs/
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
+# 依赖
+node_modules/
 venv/
-ENV/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
 
-# IDEs
+# 构建输出
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# OS
-.DS_Store
-Thumbs.db
+# 环境变量
+.env
+.env.local
+.env.production
+.env.*.local
 
-# Logs
+# 日志
 *.log
-
-# Node.js / Frontend
-node_modules/
-frontend/dist/
-frontend/build/
-frontend/.vite/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-.pnpm-store/
-# package-lock.json - 不再忽略，用于锁定依赖版本
-yarn.lock
-pnpm-lock.yaml
 
-# Environment variables
-.env
-.env.local
-.env.*.local
-.env.development
-.env.production
-backend/.env
-backend/.env.supabase
-frontend/.env
-frontend/.env.production
+# 操作系统
+.DS_Store
+Thumbs.db
 
-# Vercel 环境变量文件（包含敏感信息）
-backend/vercel-env-vars.txt
-frontend/vercel-env-vars.txt
-backend/.env.vercel
-frontend/.env.vercel
-.env.vercel.all
+# Vercel
+.vercel
 
-# 截图可能包含敏感信息
-*.png
-*.jpg
-*.jpeg
-*.gif
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-postgres-data/
-
-# Testing
+# 测试
 coverage/
-.nyc_output/
-htmlcov/
-.pytest_cache/
-.coverage
+.nyc_output
 
-# Docker
-# .dockerignore - 不再忽略，Docker构建需要这些文件
-
-# Railway
-.railway/
+# 临时文件
+*.tmp
+.cache

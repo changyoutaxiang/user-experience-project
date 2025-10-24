@@ -14,10 +14,13 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'application/json')
         self.end_headers()
 
-        if self.path == '/health' or self.path == '/':
+        # 标准化路径（移除 /api 前缀如果存在）
+        path = self.path.replace('/api', '', 1) if self.path.startswith('/api') else self.path
+
+        if path in ['/health', '/v1/health', '/']:
             response = {"status": "healthy", "message": "Backend with database support"}
         else:
-            response = {"error": "Not found"}
+            response = {"error": "Not found", "path": self.path}
 
         self.wfile.write(json.dumps(response).encode())
         return
@@ -37,8 +40,11 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({"error": "Invalid JSON"}).encode())
             return
 
+        # 标准化路径
+        path = self.path.replace('/api', '', 1) if self.path.startswith('/api') else self.path
+
         # 处理注册请求
-        if self.path == '/api/v1/auth/register':
+        if path == '/v1/auth/register':
             try:
                 # 验证必需字段
                 if not data.get('name') or not data.get('email') or not data.get('password'):
@@ -84,7 +90,7 @@ class handler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({"detail": error_message}).encode())
 
         # 处理登录请求（暂时不实现，返回 501）
-        elif self.path == '/api/v1/auth/login':
+        elif path == '/v1/auth/login':
             self.send_response(501)
             self.send_header('Content-type', 'application/json')
             self.end_headers()

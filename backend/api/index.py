@@ -1,36 +1,25 @@
-"""Vercel serverless entry point."""
-import os
-import sys
-from pathlib import Path
+from http.server import BaseHTTPRequestHandler
+import json
 
-# Add project root to Python path
-root_dir = Path(__file__).parent.parent
-sys.path.insert(0, str(root_dir))
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
 
-# Set default environment for serverless
-os.environ.setdefault("ENVIRONMENT", "production")
+        response = {
+            "status": "healthy",
+            "message": "Backend is running on Vercel"
+        }
 
-# Import and configure the FastAPI app
-try:
-    from src.api.main import app
+        self.wfile.write(json.dumps(response).encode())
+        return
 
-    # Vercel requires the app to be named 'app' or 'handler'
-    # Export both for compatibility
-    handler = app
-
-except Exception as e:
-    # Create a minimal error-reporting app if main app fails
-    from fastapi import FastAPI
-    from fastapi.responses import JSONResponse
-
-    app = FastAPI()
-
-    @app.get("/")
-    @app.get("/health")
-    async def error():
-        return JSONResponse(
-            status_code=500,
-            content={"error": str(e), "message": "Failed to initialize main app"}
-        )
-
-    handler = app
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', '*')
+        self.end_headers()
+        return

@@ -46,19 +46,19 @@ export async function GET(
         },
         expenses: {
           include: {
-            user: {
+            createdBy: {
               select: { id: true, name: true }
             }
           },
-          orderBy: { expenseDate: 'desc' }
+          orderBy: { date: 'desc' }
         },
         documentLinks: {
           include: {
-            uploadedBy: {
+            addedBy: {
               select: { id: true, name: true }
             }
           },
-          orderBy: { uploadedAt: 'desc' }
+          orderBy: { createdAt: 'desc' }
         },
         _count: {
           select: {

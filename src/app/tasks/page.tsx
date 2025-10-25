@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 
 interface Task {
   id: string
-  title: string
+  name: string
   description: string | null
   status: 'TODO' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
@@ -20,7 +20,7 @@ interface Task {
     name: string
     email: string
   } | null
-  creator: {
+  createdBy: {
     id: string
     name: string
   }
@@ -193,7 +193,7 @@ export default function TasksPage() {
               <div key={task.id} className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold mb-1">{task.title}</h3>
+                    <h3 className="text-lg font-bold mb-1">{task.name}</h3>
                     <p className="text-gray-600 text-sm mb-2">
                       {task.description || '暂无描述'}
                     </p>

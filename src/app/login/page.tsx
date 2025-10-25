@@ -15,7 +15,7 @@ export default function LoginPage() {
   
   const router = useRouter()
   const searchParams = useSearchParams()
-  const registered = searchParams.get('registered')
+  const registered = searchParams?.get('registered')
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()

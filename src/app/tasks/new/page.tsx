@@ -13,10 +13,10 @@ export default function NewTaskPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const projectIdFromUrl = searchParams.get('projectId')
+  const projectIdFromUrl = searchParams?.get('projectId')
 
   const [formData, setFormData] = useState({
-    title: '',
+    name: '',
     description: '',
     projectId: projectIdFromUrl || '',
     priority: 'MEDIUM',
@@ -65,7 +65,7 @@ export default function NewTaskPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: formData.title,
+          name: formData.name,
           description: formData.description || null,
           projectId: formData.projectId,
           priority: formData.priority,
@@ -145,8 +145,8 @@ export default function NewTaskPage() {
               </label>
               <input
                 type="text"
-                name="title"
-                value={formData.title}
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"

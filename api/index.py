@@ -56,22 +56,112 @@ class handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         """处理 POST 请求"""
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.end_headers()
+        import asyncio
 
+        # 解析请求路径
+        path = self.path.replace('/api', '', 1) if self.path.startswith('/api') else self.path
+
+        # 读取请求体
         content_length = int(self.headers.get('Content-Length', 0))
         body = self.rfile.read(content_length).decode('utf-8')
 
         try:
             data = json.loads(body) if body else {}
-        except:
-            data = {}
+        except json.JSONDecodeError:
+            self.send_response(400)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "error": "Invalid JSON"
+            }).encode())
+            return
 
-        response = {
-            "message": "POST received",
-            "data": data
-        }
+        # 处理注册请求
+        if path == '/v1/auth/register':
+            # 检查数据库模块是否可用
+            if not db_imported:
+                self.send_response(500)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "error": "Database module not available",
+                    "details": db_import_error
+                }).encode())
+                return
 
-        self.wfile.write(json.dumps(response).encode())
+            # 验证输入
+            name = data.get('name', '').strip()
+            email = data.get('email', '').strip()
+            password = data.get('password', '')
+
+            if not name or not email or not password:
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "error": "姓名、邮箱和密码都是必填项"
+                }).encode())
+                return
+
+            if len(password) < 8:
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "error": "密码长度至少为8个字符"
+                }).encode())
+                return
+
+            # 创建事件循环并执行异步函数
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                user = loop.run_until_complete(create_user(name, email, password))
+                loop.close()
+
+                self.send_response(201)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "message": "用户注册成功",
+                    "user": {
+                        "id": user.id,
+                        "name": user.name,
+                        "email": user.email
+                    }
+                }).encode())
+                return
+            except Exception as e:
+                loop.close()
+                error_msg = str(e)
+
+                # 处理特定的数据库错误
+                if 'duplicate key' in error_msg.lower() or 'unique constraint' in error_msg.lower():
+                    self.send_response(400)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "error": "该邮箱已被注册"
+                    }).encode())
+                    return
+
+                # 其他错误
+                self.send_response(500)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "error": "注册失败",
+                    "details": error_msg,
+                    "traceback": traceback.format_exc()
+                }).encode())
+                return
+
+        # 未知路径
+        self.send_response(404)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        self.wfile.write(json.dumps({
+            "error": "Not found",
+            "path": path
+        }).encode())
         return

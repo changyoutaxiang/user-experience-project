@@ -61,6 +61,7 @@ model User {
   createdTasks        Task[]           @relation("TaskCreator")
   expenses            Expense[]
   auditLogs           AuditLog[]
+  addedDocuments      DocumentLink[]   @relation("DocumentAddedBy")
 
   // NextAuth.js fields
   accounts            Account[]
@@ -193,11 +194,13 @@ model DocumentLink {
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  task    Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  project  Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task     Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  addedBy  User     @relation("DocumentAddedBy", fields: [addedById], references: [id], onDelete: Cascade)
 
   @@index([projectId])
   @@index([taskId])
+  @@index([addedById])
   @@map("document_links")
 }
 

@@ -49,7 +49,7 @@ export const useAuth = () => {
     } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.detail || 'Registration failed',
+        error: error.response?.data?.error || error.response?.data?.detail || '注册失败',
       }
     }
   }

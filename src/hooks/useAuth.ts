@@ -15,7 +15,7 @@ export const useAuth = () => {
       formData.append('username', credentials.username)
       formData.append('password', credentials.password)
 
-      const response = await api.post<AuthResponse>('/api/v1/auth/login', formData, {
+      const response = await api.post<AuthResponse>('/v1/auth/login', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -35,7 +35,7 @@ export const useAuth = () => {
 
   const logout = async () => {
     try {
-      await api.post('/api/v1/auth/logout')
+      await api.post('/v1/auth/logout')
     } catch {
       // Logout on client side even if API call fails
     } finally {
@@ -45,7 +45,7 @@ export const useAuth = () => {
 
   const register = async (userData: UserCreateRequest) => {
     try {
-      const response = await api.post<User>('/api/v1/auth/register', userData)
+      const response = await api.post<User>('/v1/auth/register', userData)
 
       return {
         success: true,

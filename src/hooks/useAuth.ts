@@ -10,15 +10,10 @@ export const useAuth = () => {
 
   const login = async (credentials: LoginCredentials) => {
     try {
-      // FastAPI OAuth2PasswordRequestForm expects form data
-      const formData = new FormData()
-      formData.append('username', credentials.username)
-      formData.append('password', credentials.password)
-
-      const response = await api.post<AuthResponse>('/v1/auth/login', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      // 使用 JSON 格式发送登录请求
+      const response = await api.post<AuthResponse>('/v1/auth/login', {
+        email: credentials.username,  // username 字段映射到 email
+        password: credentials.password,
       })
 
       const { access_token, user: userData } = response.data
@@ -28,7 +23,7 @@ export const useAuth = () => {
     } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.detail || 'Login failed',
+        error: error.response?.data?.error || error.response?.data?.detail || '登录失败',
       }
     }
   }

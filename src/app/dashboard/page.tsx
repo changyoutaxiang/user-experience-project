@@ -42,7 +42,7 @@ export default async function DashboardPage() {
       <div className="max-w-7xl mx-auto p-6">
         <div className="mb-6">
           <h1 className="text-2xl font-bold">仪表板</h1>
-          <p className="text-gray-600">欢迎回来，{session.user.name}</p>
+          <p className="text-gray-600">欢迎回来，{session.user?.name || '用户'}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

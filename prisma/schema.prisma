@@ -254,9 +254,9 @@ model Expense {
   projectId   String   @map("project_id") @db.Uuid
   description String   @db.VarChar(500)
   amount      Decimal  @db.Decimal(15, 2)
-  category    String   @db.VarChar(100)
+  category    String?  @db.VarChar(100)
   date        DateTime @db.Date
-  
+
   // Relations
   createdById String   @map("created_by_id") @db.Uuid
   createdAt   DateTime @default(now()) @map("created_at")

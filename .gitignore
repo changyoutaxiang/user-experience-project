@@ -46,3 +46,13 @@ coverage/
 # 临时文件
 *.tmp
 .cache
+
+# Next.js
+.next/
+out/
+
+# Prisma
+prisma/migrations/
+
+# 敏感环境变量文件
+.env.vercel

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -9,7 +9,7 @@ interface Project {
   name: string
 }
 
-export default function NewTaskPage() {
+function NewTaskForm() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -220,5 +220,17 @@ export default function NewTaskPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function NewTaskPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div>加载中...</div>
+      </div>
+    }>
+      <NewTaskForm />
+    </Suspense>
   )
 }

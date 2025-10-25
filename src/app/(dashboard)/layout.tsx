@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { Layout } from '@/components/layout/Layout'
 
 export default async function DashboardLayout({
   children,
@@ -14,5 +13,5 @@ export default async function DashboardLayout({
     redirect('/login')
   }
 
-  return <Layout>{children}</Layout>
+  return <>{children}</>
 }

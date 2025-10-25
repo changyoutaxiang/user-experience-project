@@ -14,11 +14,13 @@ if current_dir not in sys.path:
 db_import_error = None
 create_user = None
 authenticate_user = None
+reset_engine = None
 
 try:
     import db
     create_user = db.create_user
     authenticate_user = db.authenticate_user
+    reset_engine = db.reset_engine
     db_imported = True
 except Exception as e:
     db_imported = False
@@ -112,10 +114,14 @@ class handler(BaseHTTPRequestHandler):
                 }).encode())
                 return
 
-            # 创建事件循环并执行异步函数
+            # 创建新事件循环并重置引擎
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             try:
+                # 重置数据库引擎以避免事件循环冲突
+                if reset_engine:
+                    loop.run_until_complete(reset_engine())
+
                 user = loop.run_until_complete(create_user(name, email, password))
                 loop.close()
 

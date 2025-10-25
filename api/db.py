@@ -12,6 +12,14 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 _engine = None
 _session_factory = None
 
+async def reset_engine():
+    """重置引擎和会话工厂 - 用于清理旧的事件循环"""
+    global _engine, _session_factory
+    if _engine is not None:
+        await _engine.dispose()
+        _engine = None
+        _session_factory = None
+
 def get_session_factory():
     """获取或创建会话工厂"""
     global _engine, _session_factory

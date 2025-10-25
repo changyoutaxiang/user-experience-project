@@ -60,15 +60,26 @@ export default function ProjectsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">项目列表</h1>
-          <p className="text-gray-600">管理您的所有项目</p>
+        <div className="mb-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold">项目列表</h1>
+            <p className="text-gray-600">管理您的所有项目</p>
+          </div>
+          <button
+            onClick={() => router.push('/projects/new')}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            创建项目
+          </button>
         </div>
 
         {projects.length === 0 ? (
           <div className="bg-white p-12 rounded-lg shadow text-center">
             <p className="text-gray-500 mb-4">还没有项目</p>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            <button
+              onClick={() => router.push('/projects/new')}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
               创建第一个项目
             </button>
           </div>

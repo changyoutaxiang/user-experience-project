@@ -178,12 +178,14 @@ export default function TasksPage() {
             <p className="text-gray-500 mb-4">
               {statusFilter === 'all' ? '还没有任务' : `没有${statusLabels[statusFilter as keyof typeof statusLabels]}任务`}
             </p>
-            <button
-              onClick={() => router.push('/tasks/new')}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            >
-              创建第一个任务
-            </button>
+            {statusFilter === 'all' && (
+              <button
+                onClick={() => router.push('/tasks/new')}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                创建第一个任务
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-4">

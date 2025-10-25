@@ -1,11 +1,13 @@
 """数据库连接和用户操作 - Vercel serverless 版本"""
 import os
+import json
 from datetime import datetime
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy import text
 from sqlalchemy.pool import NullPool
 from passlib.context import CryptContext
-from supabase import create_client, Client
+import urllib.request
+import urllib.error
 
 # 密码加密上下文
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -13,16 +15,40 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # 全局变量，延迟初始化
 _engine = None
 _session_factory = None
-_supabase_client: Client = None
 
-def get_supabase_client() -> Client:
-    """获取或创建 Supabase 客户端"""
-    global _supabase_client
-    if _supabase_client is None:
-        supabase_url = os.environ.get("SUPABASE_URL", "")
-        supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
-        _supabase_client = create_client(supabase_url, supabase_key)
-    return _supabase_client
+def create_supabase_user(email: str, password: str, user_metadata: dict) -> dict:
+    """使用 Supabase Admin API 创建用户"""
+    supabase_url = os.environ.get("SUPABASE_URL", "")
+    supabase_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+
+    url = f"{supabase_url}/auth/v1/admin/users"
+    headers = {
+        "apikey": supabase_key,
+        "Authorization": f"Bearer {supabase_key}",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "email": email,
+        "password": password,
+        "email_confirm": True,
+        "user_metadata": user_metadata
+    }
+
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(data).encode('utf-8'),
+        headers=headers,
+        method='POST'
+    )
+
+    try:
+        with urllib.request.urlopen(req) as response:
+            result = json.loads(response.read().decode('utf-8'))
+            return result
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode('utf-8')
+        raise Exception(f"Supabase API错误: {error_body}")
 
 async def reset_engine():
     """重置引擎和会话工厂 - 用于清理旧的事件循环"""
@@ -87,22 +113,16 @@ async def create_user(name: str, email: str, password: str) -> dict:
     """
     try:
         # 使用 Supabase Admin API 创建认证用户
-        supabase = get_supabase_client()
+        auth_response = create_supabase_user(
+            email=email,
+            password=password,
+            user_metadata={"name": name}
+        )
 
-        auth_response = supabase.auth.admin.create_user({
-            "email": email,
-            "password": password,
-            "email_confirm": True,  # 自动确认邮箱，跳过验证流程
-            "user_metadata": {
-                "name": name
-            }
-        })
-
-        if not auth_response or not auth_response.user:
+        if not auth_response or "id" not in auth_response:
             raise Exception("创建认证用户失败")
 
-        auth_user = auth_response.user
-        auth_user_id = auth_user.id
+        auth_user_id = auth_response["id"]
 
         # 在自定义 users 表中创建记录
         session_factory = get_session_factory()
@@ -145,17 +165,12 @@ async def create_user(name: str, email: str, password: str) -> dict:
 
             except Exception as e:
                 await session.rollback()
-                # 如果数据库插入失败，尝试删除已创建的 auth 用户
-                try:
-                    supabase.auth.admin.delete_user(auth_user_id)
-                except:
-                    pass
                 raise e
 
     except Exception as e:
         error_msg = str(e)
         # 处理 Supabase 特定错误
-        if "already registered" in error_msg.lower() or "already exists" in error_msg.lower():
+        if "already registered" in error_msg.lower() or "already exists" in error_msg.lower() or "unique" in error_msg.lower():
             raise Exception("邮箱已被注册")
         raise Exception(f"注册失败: {error_msg}")
 

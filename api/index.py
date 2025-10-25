@@ -34,11 +34,39 @@ class handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         """处理 GET 请求"""
+        path = self.path.replace('/api', '', 1) if self.path.startswith('/api') else self.path
+
+        # Dashboard 数据接口
+        if path == '/v1/dashboard':
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+
+            # 返回初始化的空数据结构
+            dashboard_data = {
+                "total_projects": 0,
+                "overdue_projects": 0,
+                "overdue_tasks": 0,
+                "my_pending_tasks": 0,
+                "total_tasks": 0,
+                "total_budget": 0,
+                "total_spent": 0,
+                "budget_usage_rate": 0,
+                "projects_by_status": {
+                    "planning": 0,
+                    "in_progress": 0,
+                    "completed": 0,
+                    "archived": 0
+                }
+            }
+
+            self.wfile.write(json.dumps(dashboard_data, ensure_ascii=False).encode('utf-8'))
+            return
+
+        # 健康检查接口
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
         self.end_headers()
-
-        path = self.path.replace('/api', '', 1) if self.path.startswith('/api') else self.path
 
         response = {
             "status": "healthy",

@@ -25,6 +25,7 @@ export default function Navbar() {
   ]
 
   const isActive = (path: string) => {
+    if (!pathname) return false
     if (path === '/dashboard') {
       return pathname === path
     }

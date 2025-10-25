@@ -130,12 +130,8 @@ class handler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({
                     "message": "用户注册成功",
-                    "user": {
-                        "id": user.id,
-                        "name": user.name,
-                        "email": user.email
-                    }
-                }).encode())
+                    "user": user
+                }, ensure_ascii=False).encode('utf-8'))
                 return
             except Exception as e:
                 loop.close()

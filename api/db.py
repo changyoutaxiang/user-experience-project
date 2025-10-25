@@ -29,7 +29,13 @@ def get_session_factory():
         database_url = os.environ.get("DATABASE_URL", "")
 
         # 创建异步引擎
-        _engine = create_async_engine(database_url, echo=False, pool_pre_ping=True)
+        # statement_cache_size=0 用于兼容 Supabase Transaction Pooler (pgbouncer)
+        _engine = create_async_engine(
+            database_url,
+            echo=False,
+            pool_pre_ping=True,
+            connect_args={"statement_cache_size": 0}
+        )
 
         # 创建会话工厂
         _session_factory = async_sessionmaker(

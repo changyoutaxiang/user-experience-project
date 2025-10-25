@@ -1,10 +1,6 @@
-"""Vercel serverless entry point - 完整数据库支持版本
-前后端在同一个域下，不需要 CORS 配置
-"""
+"""Vercel serverless entry point - 简化测试版本"""
 from http.server import BaseHTTPRequestHandler
 import json
-import asyncio
-from db import create_user, authenticate_user
 
 class handler(BaseHTTPRequestHandler):
 
@@ -14,92 +10,36 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'application/json')
         self.end_headers()
 
-        # 标准化路径（移除 /api 前缀如果存在）
         path = self.path.replace('/api', '', 1) if self.path.startswith('/api') else self.path
 
-        if path in ['/health', '/v1/health', '/']:
-            response = {"status": "healthy", "message": "Backend with database support"}
-        else:
-            response = {"error": "Not found", "path": self.path}
+        response = {
+            "status": "healthy",
+            "message": "API is working!",
+            "path": self.path,
+            "normalized_path": path
+        }
 
         self.wfile.write(json.dumps(response).encode())
         return
 
     def do_POST(self):
         """处理 POST 请求"""
-        # 读取请求体
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+
         content_length = int(self.headers.get('Content-Length', 0))
         body = self.rfile.read(content_length).decode('utf-8')
 
         try:
             data = json.loads(body) if body else {}
         except:
-            self.send_response(400)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({"error": "Invalid JSON"}).encode())
-            return
+            data = {}
 
-        # 标准化路径
-        path = self.path.replace('/api', '', 1) if self.path.startswith('/api') else self.path
+        response = {
+            "message": "POST received",
+            "data": data
+        }
 
-        # 处理注册请求
-        if path == '/v1/auth/register':
-            try:
-                # 验证必需字段
-                if not data.get('name') or not data.get('email') or not data.get('password'):
-                    self.send_response(400)
-                    self.send_header('Content-type', 'application/json')
-                    self.end_headers()
-                    self.wfile.write(json.dumps({"detail": "姓名、邮箱和密码都是必需的"}).encode())
-                    return
-
-                # 验证密码长度
-                if len(data.get('password', '')) < 8:
-                    self.send_response(400)
-                    self.send_header('Content-type', 'application/json')
-                    self.end_headers()
-                    self.wfile.write(json.dumps({"detail": "密码长度至少为 8 个字符"}).encode())
-                    return
-
-                # 创建用户（使用异步函数）
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                user = loop.run_until_complete(
-                    create_user(
-                        name=data['name'],
-                        email=data['email'],
-                        password=data['password']
-                    )
-                )
-                loop.close()
-
-                # 返回成功响应
-                self.send_response(201)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps(user).encode())
-
-            except Exception as e:
-                error_message = str(e)
-                status_code = 400 if "已被注册" in error_message else 500
-
-                self.send_response(status_code)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"detail": error_message}).encode())
-
-        # 处理登录请求（暂时不实现，返回 501）
-        elif path == '/v1/auth/login':
-            self.send_response(501)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({"detail": "登录功能即将推出"}).encode())
-
-        else:
-            self.send_response(404)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({"error": "Endpoint not found"}).encode())
-
+        self.wfile.write(json.dumps(response).encode())
         return

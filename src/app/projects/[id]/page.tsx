@@ -28,7 +28,7 @@ interface Project {
   }>
   tasks: Array<{
     id: string
-    title: string
+    name: string
     status: string
     priority: string
     assignee: {
@@ -40,8 +40,8 @@ interface Project {
     id: string
     amount: number
     description: string
-    expenseDate: string
-    user: {
+    date: string
+    createdBy: {
       id: string
       name: string
     }
@@ -50,8 +50,8 @@ interface Project {
     id: string
     title: string
     url: string
-    uploadedAt: string
-    uploadedBy: {
+    createdAt: string
+    addedBy: {
       id: string
       name: string
     }
@@ -100,14 +100,14 @@ export default function ProjectDetailPage() {
       return
     }
 
-    if (status === 'authenticated' && params.id) {
+    if (status === 'authenticated' && params?.id) {
       fetchProject()
     }
-  }, [status, params.id, router])
+  }, [status, params?.id, router])
 
   const fetchProject = async () => {
     try {
-      const res = await fetch(`/api/projects/${params.id}`)
+      const res = await fetch(`/api/projects/${params?.id}`)
       if (res.ok) {
         const data = await res.json()
         setProject(data)
@@ -241,7 +241,7 @@ export default function ProjectDetailPage() {
                   {project.tasks.slice(0, 5).map(task => (
                     <div key={task.id} className="flex justify-between items-center py-2 border-b last:border-b-0">
                       <div>
-                        <p className="font-medium">{task.title}</p>
+                        <p className="font-medium">{task.name}</p>
                         <p className="text-sm text-gray-500">
                           负责人: {task.assignee?.name || '未分配'}
                         </p>
@@ -264,7 +264,7 @@ export default function ProjectDetailPage() {
                   project.tasks.map(task => (
                     <div key={task.id} className="flex justify-between items-center p-4 bg-gray-50 rounded">
                       <div>
-                        <p className="font-medium">{task.title}</p>
+                        <p className="font-medium">{task.name}</p>
                         <p className="text-sm text-gray-500">
                           负责人: {task.assignee?.name || '未分配'} • 优先级: {priorityLabels[task.priority]}
                         </p>
@@ -310,7 +310,7 @@ export default function ProjectDetailPage() {
                       <div>
                         <p className="font-medium">{expense.description}</p>
                         <p className="text-sm text-gray-500">
-                          {expense.user.name} • {new Date(expense.expenseDate).toLocaleDateString('zh-CN')}
+                          {expense.createdBy.name} • {new Date(expense.date).toLocaleDateString('zh-CN')}
                         </p>
                       </div>
                       <span className="text-lg font-bold text-red-600">
@@ -333,7 +333,7 @@ export default function ProjectDetailPage() {
                       <div>
                         <p className="font-medium">{doc.title}</p>
                         <p className="text-sm text-gray-500">
-                          上传者: {doc.uploadedBy.name} • {new Date(doc.uploadedAt).toLocaleDateString('zh-CN')}
+                          上传者: {doc.addedBy.name} • {new Date(doc.createdAt).toLocaleDateString('zh-CN')}
                         </p>
                       </div>
                       <a

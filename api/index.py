@@ -63,6 +63,18 @@ class handler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(dashboard_data, ensure_ascii=False).encode('utf-8'))
             return
 
+        # 项目列表接口
+        if path == '/v1/projects' or path.startswith('/v1/projects?'):
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+
+            # 返回空项目列表
+            projects = []
+
+            self.wfile.write(json.dumps(projects, ensure_ascii=False).encode('utf-8'))
+            return
+
         # 健康检查接口
         self.send_response(200)
         self.send_header('Content-type', 'application/json')

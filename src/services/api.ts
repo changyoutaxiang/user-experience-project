@@ -1,11 +1,12 @@
 /**
  * Axios instance with JWT interceptor for API calls.
- * 使用相对路径 /api，前后端在同一个域下部署
  */
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 
-// 使用相对路径，不需要 CORS
-const API_BASE_URL = '/api'
+// 生产环境使用相对路径（前后端同域），开发环境使用 localhost
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (
+  import.meta.env.PROD ? '' : 'http://localhost:8000'
+)
 
 // Create axios instance
 const api = axios.create({

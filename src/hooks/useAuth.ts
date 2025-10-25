@@ -10,9 +10,9 @@ export const useAuth = () => {
 
   const login = async (credentials: LoginCredentials) => {
     try {
-      // 使用 JSON 格式发送登录请求
-      const response = await api.post<AuthResponse>('/v1/auth/login', {
-        email: credentials.username,  // username 字段映射到 email
+      // 发送 JSON 格式的登录请求
+      const response = await api.post<AuthResponse>('/api/v1/auth/login', {
+        email: credentials.username,
         password: credentials.password,
       })
 
@@ -23,14 +23,14 @@ export const useAuth = () => {
     } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.error || error.response?.data?.detail || '登录失败',
+        error: error.response?.data?.error || error.response?.data?.detail || 'Login failed',
       }
     }
   }
 
   const logout = async () => {
     try {
-      await api.post('/v1/auth/logout')
+      await api.post('/api/v1/auth/logout')
     } catch {
       // Logout on client side even if API call fails
     } finally {
@@ -40,7 +40,7 @@ export const useAuth = () => {
 
   const register = async (userData: UserCreateRequest) => {
     try {
-      const response = await api.post<User>('/v1/auth/register', userData)
+      const response = await api.post<User>('/api/v1/auth/register', userData)
 
       return {
         success: true,
@@ -49,7 +49,7 @@ export const useAuth = () => {
     } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.detail || 'Registration failed',
+        error: error.response?.data?.error || error.response?.data?.detail || '注册失败',
       }
     }
   }

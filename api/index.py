@@ -158,6 +158,84 @@ class handler(BaseHTTPRequestHandler):
                 }).encode())
                 return
 
+        # 处理登录请求
+        if path == '/v1/auth/login':
+            # 检查数据库模块是否可用
+            if not db_imported:
+                self.send_response(500)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "error": "Database module not available",
+                    "details": db_import_error
+                }).encode())
+                return
+
+            # 验证输入
+            email = data.get('email', '').strip()
+            password = data.get('password', '')
+
+            if not email or not password:
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "error": "邮箱和密码都是必填项"
+                }, ensure_ascii=False).encode('utf-8'))
+                return
+
+            # 创建新事件循环并重置引擎
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                # 重置数据库引擎以避免事件循环冲突
+                if reset_engine:
+                    loop.run_until_complete(reset_engine())
+
+                result = loop.run_until_complete(authenticate_user(email, password))
+                loop.close()
+
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "access_token": result["access_token"],
+                    "refresh_token": result.get("refresh_token", ""),
+                    "expires_in": result.get("expires_in", 3600),
+                    "user": {
+                        "id": result["id"],
+                        "name": result["name"],
+                        "email": result["email"],
+                        "role": result["role"],
+                        "is_active": result["is_active"]
+                    }
+                }, ensure_ascii=False).encode('utf-8'))
+                return
+            except Exception as e:
+                loop.close()
+                error_msg = str(e)
+
+                # 处理认证错误
+                if '邮箱或密码错误' in error_msg or '未激活' in error_msg:
+                    self.send_response(401)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        "error": error_msg
+                    }, ensure_ascii=False).encode('utf-8'))
+                    return
+
+                # 其他错误
+                self.send_response(500)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "error": "登录失败",
+                    "details": error_msg,
+                    "traceback": traceback.format_exc()
+                }, ensure_ascii=False).encode('utf-8'))
+                return
+
         # 未知路径
         self.send_response(404)
         self.send_header('Content-type', 'application/json')

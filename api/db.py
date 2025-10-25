@@ -30,12 +30,14 @@ def get_session_factory():
         database_url = os.environ.get("DATABASE_URL", "")
 
         # 创建异步引擎
-        # 使用 NullPool 避免连接池复用，每次都创建新连接
-        # 这样可以避免 pgbouncer + prepared statements 的冲突
+        # 使用 NullPool + statement_cache_size=0 解决 pgbouncer 问题
         _engine = create_async_engine(
             database_url,
             echo=False,
-            poolclass=NullPool
+            poolclass=NullPool,
+            connect_args={
+                "statement_cache_size": 0  # 禁用asyncpg的prepared statement缓存
+            }
         )
 
         # 创建会话工厂

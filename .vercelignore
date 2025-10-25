@@ -1,0 +1,9 @@
+# 忽略旧的项目结构
+frontend/
+backend/
+
+# 忽略开发文件
+*.log
+.DS_Store
+.env.local
+.env.*.local

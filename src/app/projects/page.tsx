@@ -75,7 +75,11 @@ export default function ProjectsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.map((project) => (
-              <div key={project.id} className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow">
+              <div
+                key={project.id}
+                onClick={() => router.push(`/projects/${project.id}`)}
+                className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer"
+              >
                 <h3 className="text-lg font-bold mb-2">{project.name}</h3>
                 <p className="text-gray-600 text-sm mb-4">
                   {project.description || '暂无描述'}

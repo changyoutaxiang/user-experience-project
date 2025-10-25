@@ -3,22 +3,17 @@
  */
 import { useAuthStore } from '@/store/authStore'
 import api from '@/services/api'
-import { LoginCredentials, AuthResponse } from '@/types/user'
+import { LoginCredentials, AuthResponse, User, UserCreateRequest } from '@/types/user'
 
 export const useAuth = () => {
   const { user, isAuthenticated, setAuth, clearAuth } = useAuthStore()
 
   const login = async (credentials: LoginCredentials) => {
     try {
-      // FastAPI OAuth2PasswordRequestForm expects form data
-      const formData = new FormData()
-      formData.append('username', credentials.username)
-      formData.append('password', credentials.password)
-
-      const response = await api.post<AuthResponse>('/api/v1/auth/login', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      // 发送 JSON 格式的登录请求
+      const response = await api.post<AuthResponse>('/api/v1/auth/login', {
+        email: credentials.username,
+        password: credentials.password,
       })
 
       const { access_token, user: userData } = response.data
@@ -28,7 +23,7 @@ export const useAuth = () => {
     } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.detail || 'Login failed',
+        error: error.response?.data?.error || error.response?.data?.detail || 'Login failed',
       }
     }
   }
@@ -43,10 +38,27 @@ export const useAuth = () => {
     }
   }
 
+  const register = async (userData: UserCreateRequest) => {
+    try {
+      const response = await api.post<User>('/api/v1/auth/register', userData)
+
+      return {
+        success: true,
+        user: response.data
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error || error.response?.data?.detail || '注册失败',
+      }
+    }
+  }
+
   return {
     user,
     isAuthenticated,
     login,
     logout,
+    register,
   }
 }

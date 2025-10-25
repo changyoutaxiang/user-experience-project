@@ -1,0 +1,7 @@
+# 数据库相关
+sqlalchemy==2.0.27
+asyncpg==0.29.0
+
+# 认证和安全
+passlib[bcrypt]==1.7.4
+bcrypt==4.1.2

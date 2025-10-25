@@ -1,5 +1,7 @@
 # 用户体验拯救 Development Guidelines
 
+**重要提示：请始终用中文与用户沟通。**
+
 Auto-generated from all feature plans. Last updated: 2025-10-21
 
 ## Active Technologies

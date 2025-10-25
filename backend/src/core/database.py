@@ -5,8 +5,9 @@ from sqlalchemy.orm import declarative_base
 from src.core.config import settings
 
 # Create async engine
+# Use database_url_async property to automatically convert postgresql:// to postgresql+asyncpg://
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    settings.database_url_async,
     echo=settings.DEBUG,
     future=True,
     pool_pre_ping=True,

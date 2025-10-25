@@ -3,7 +3,10 @@
  */
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+// 生产环境使用相对路径（前后端同域），开发环境使用 localhost
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (
+  import.meta.env.PROD ? '' : 'http://localhost:8000'
+)
 
 // Create axios instance
 const api = axios.create({
@@ -41,4 +44,6 @@ api.interceptors.response.use(
   }
 )
 
+// Export both default and named exports for flexibility
+export { api }
 export default api

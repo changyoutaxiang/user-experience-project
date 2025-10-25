@@ -167,7 +167,7 @@ export const TaskForm = ({ task, projectMembers, onSubmit, onCancel, submitLabel
           <option value="">未分配</option>
           {projectMembers.map(member => (
             <option key={member.user_id} value={member.user_id}>
-              {member.user_name}
+              {member.user.name}
             </option>
           ))}
         </select>

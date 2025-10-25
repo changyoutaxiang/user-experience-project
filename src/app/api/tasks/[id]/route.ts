@@ -32,7 +32,7 @@ export async function GET(
         assignee: {
           select: { id: true, name: true, email: true }
         },
-        creator: {
+        createdBy: {
           select: { id: true, name: true, email: true }
         }
       }
@@ -101,7 +101,7 @@ export async function PATCH(
         assignee: {
           select: { id: true, name: true, email: true }
         },
-        creator: {
+        createdBy: {
           select: { id: true, name: true }
         }
       }

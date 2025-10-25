@@ -27,7 +27,7 @@ export async function GET(
         project: {
           select: { id: true, name: true, description: true }
         },
-        user: {
+        createdBy: {
           select: { id: true, name: true, email: true }
         }
       }
@@ -82,7 +82,7 @@ export async function PATCH(
     if (amount !== undefined) updateData.amount = amount
     if (description !== undefined) updateData.description = description
     if (category !== undefined) updateData.category = category
-    if (expenseDate !== undefined) updateData.expenseDate = new Date(expenseDate)
+    if (expenseDate !== undefined) updateData.date = new Date(expenseDate)
 
     const expense = await prisma.expense.update({
       where: { id: params.id },
@@ -91,7 +91,7 @@ export async function PATCH(
         project: {
           select: { id: true, name: true }
         },
-        user: {
+        createdBy: {
           select: { id: true, name: true, email: true }
         }
       }

@@ -39,7 +39,7 @@ export async function GET(request: Request) {
         assignee: {
           select: { id: true, name: true, email: true }
         },
-        creator: {
+        createdBy: {
           select: { id: true, name: true }
         }
       },
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
         assigneeId,
         priority: priority || 'MEDIUM',
         dueDate: dueDate ? new Date(dueDate) : null,
-        creatorId: (session.user as any).id,
+        createdById: (session.user as any).id,
       },
       include: {
         project: {
@@ -111,7 +111,7 @@ export async function POST(request: Request) {
         assignee: {
           select: { id: true, name: true, email: true }
         },
-        creator: {
+        createdBy: {
           select: { id: true, name: true }
         }
       }

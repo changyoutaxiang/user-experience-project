@@ -31,11 +31,11 @@ export async function GET(request: Request) {
         project: {
           select: { id: true, name: true }
         },
-        user: {
+        createdBy: {
           select: { id: true, name: true, email: true }
         }
       },
-      orderBy: { expenseDate: 'desc' }
+      orderBy: { date: 'desc' }
     })
 
     return NextResponse.json(expenses)
@@ -82,14 +82,14 @@ export async function POST(request: Request) {
         description,
         category: category || null,
         projectId,
-        userId: (session.user as any).id,
-        expenseDate: new Date(expenseDate),
+        createdById: (session.user as any).id,
+        date: new Date(expenseDate),
       },
       include: {
         project: {
           select: { id: true, name: true }
         },
-        user: {
+        createdBy: {
           select: { id: true, name: true, email: true }
         }
       }

@@ -4,13 +4,21 @@ import json
 import sys
 import traceback
 
+# 添加当前目录到 Python 路径
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 # 尝试导入数据库模块并捕获错误
 db_import_error = None
 create_user = None
 authenticate_user = None
 
 try:
-    from db import create_user, authenticate_user
+    import db
+    create_user = db.create_user
+    authenticate_user = db.authenticate_user
     db_imported = True
 except Exception as e:
     db_imported = False

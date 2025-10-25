@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth'
 import { z } from 'zod'
 
 const updateTaskSchema = z.object({
-  title: z.string().min(1, '任务标题不能为空').optional(),
+  name: z.string().min(1, '任务标题不能为空').optional(),
   description: z.string().optional(),
   status: z.enum(['TODO', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional(),
@@ -82,9 +82,9 @@ export async function PATCH(
     }
 
     const updateData: any = {}
-    const { title, description, status, priority, assigneeId, dueDate } = validation.data
+    const { name, description, status, priority, assigneeId, dueDate } = validation.data
 
-    if (title !== undefined) updateData.title = title
+    if (name !== undefined) updateData.name = name
     if (description !== undefined) updateData.description = description
     if (status !== undefined) updateData.status = status
     if (priority !== undefined) updateData.priority = priority

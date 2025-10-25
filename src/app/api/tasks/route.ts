@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth'
 import { z } from 'zod'
 
 const createTaskSchema = z.object({
-  title: z.string().min(1, '任务标题不能为空'),
+  name: z.string().min(1, '任务标题不能为空'),
   description: z.string().optional(),
   projectId: z.string().uuid('无效的项目ID'),
   assigneeId: z.string().uuid('无效的负责人ID').optional(),
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const { title, description, projectId, assigneeId, priority, dueDate } = validation.data
+    const { name, description, projectId, assigneeId, priority, dueDate } = validation.data
 
     // 验证项目是否存在
     const project = await prisma.project.findUnique({
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
 
     const task = await prisma.task.create({
       data: {
-        title,
+        name,
         description,
         projectId,
         assigneeId,

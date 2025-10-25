@@ -1,6 +1,24 @@
-"""Vercel serverless entry point - 简化测试版本"""
+"""Vercel serverless entry point - 测试数据库模块导入"""
 from http.server import BaseHTTPRequestHandler
 import json
+import sys
+import traceback
+
+# 尝试导入数据库模块并捕获错误
+db_import_error = None
+create_user = None
+authenticate_user = None
+
+try:
+    from db import create_user, authenticate_user
+    db_imported = True
+except Exception as e:
+    db_imported = False
+    db_import_error = {
+        "error": str(e),
+        "type": type(e).__name__,
+        "traceback": traceback.format_exc()
+    }
 
 class handler(BaseHTTPRequestHandler):
 
@@ -14,12 +32,18 @@ class handler(BaseHTTPRequestHandler):
 
         response = {
             "status": "healthy",
-            "message": "API is working!",
+            "message": "API with database module test",
             "path": self.path,
-            "normalized_path": path
+            "db_module_imported": db_imported,
+            "db_import_error": db_import_error,
+            "python_version": sys.version,
+            "available_functions": {
+                "create_user": create_user is not None,
+                "authenticate_user": authenticate_user is not None
+            }
         }
 
-        self.wfile.write(json.dumps(response).encode())
+        self.wfile.write(json.dumps(response, indent=2).encode())
         return
 
     def do_POST(self):

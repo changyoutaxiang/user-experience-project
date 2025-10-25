@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy import text
+from sqlalchemy.pool import NullPool
 from passlib.context import CryptContext
 
 # 密码加密上下文
@@ -28,18 +29,13 @@ def get_session_factory():
         # 数据库配置
         database_url = os.environ.get("DATABASE_URL", "")
 
-        # 添加 prepared_statement_cache_size=0 参数以兼容 pgbouncer
-        if "?" in database_url:
-            database_url += "&prepared_statement_cache_size=0"
-        else:
-            database_url += "?prepared_statement_cache_size=0"
-
         # 创建异步引擎
-        # prepared_statement_cache_size=0 用于兼容 Supabase Transaction Pooler (pgbouncer)
+        # 使用 NullPool 避免连接池复用，每次都创建新连接
+        # 这样可以避免 pgbouncer + prepared statements 的冲突
         _engine = create_async_engine(
             database_url,
             echo=False,
-            pool_pre_ping=True
+            poolclass=NullPool
         )
 
         # 创建会话工厂

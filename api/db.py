@@ -28,13 +28,18 @@ def get_session_factory():
         # 数据库配置
         database_url = os.environ.get("DATABASE_URL", "")
 
+        # 添加 prepared_statement_cache_size=0 参数以兼容 pgbouncer
+        if "?" in database_url:
+            database_url += "&prepared_statement_cache_size=0"
+        else:
+            database_url += "?prepared_statement_cache_size=0"
+
         # 创建异步引擎
-        # statement_cache_size=0 用于兼容 Supabase Transaction Pooler (pgbouncer)
+        # prepared_statement_cache_size=0 用于兼容 Supabase Transaction Pooler (pgbouncer)
         _engine = create_async_engine(
             database_url,
             echo=False,
-            pool_pre_ping=True,
-            connect_args={"statement_cache_size": 0}
+            pool_pre_ping=True
         )
 
         # 创建会话工厂
